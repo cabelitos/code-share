@@ -1,0 +1,7 @@
+.eslintcache
+node_modules
+yarn-error.log
+.env
+code-share.sqlite*
+build
+lerna-debug.log

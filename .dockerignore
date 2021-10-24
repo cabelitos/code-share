@@ -1,0 +1,12 @@
+**/node_modules
+**/.vscode/
+**/node_modules/
+**/.gitignore
+**/.eslintcache
+**/build/
+**/k8s/
+**/docs/
+**/*~
+.docker-secret*
+docker-compose.yml
+code-share.sqlite*

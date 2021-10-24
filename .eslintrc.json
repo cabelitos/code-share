@@ -1,0 +1,83 @@
+{
+  "root": true,
+  "env": {
+    "es6": true
+  },
+  "parser": "@typescript-eslint/parser",
+  "extends": [
+    "airbnb",
+    "airbnb/hooks",
+    "plugin:prettier/recommended",
+    "plugin:import/errors",
+    "prettier",
+    "plugin:prettier/recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:import/typescript"
+  ],
+  "globals": {
+    "Atomics": "readonly",
+    "SharedArrayBuffer": "readonly"
+  },
+  "settings": {
+    "import/resolver": {
+      "typescript": {}
+    }
+  },
+  "parserOptions": {
+    "ecmaVersion": 2018,
+    "sourceType": "module"
+  },
+  "plugins": [
+    "react",
+    "react-hooks",
+    "jsx-a11y",
+    "import",
+    "@typescript-eslint",
+    "filenames",
+    "import"
+  ],
+  "rules": {
+    "@typescript-eslint/ban-types": [
+      "error",
+      {
+        "types": {
+          "{}": false
+        }
+      }
+    ],
+    "class-methods-use-this": "off",
+    "react/require-default-props": "off",
+    "react/prop-types": "off",
+    "no-shadow": "off",
+    "no-use-before-define": "off",
+    "import/extensions": "off",
+    "react/jsx-filename-extension": "off",
+    "react/jsx-one-expression-per-line": "off",
+    "react/jsx-props-no-spreading": "off",
+    "import/no-cycle": "error",
+    "import/no-unresolved": "error",
+    "@typescript-eslint/no-empty-function": "off",
+    "no-underscore-dangle": "off",
+    "no-param-reassign": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ],
+    "prettier/prettier": [
+      "error",
+      {
+        "singleQuote": true,
+        "trailingComma": "all",
+        "semi": true,
+        "printWidth": 80,
+        "tabWidth": 2,
+        "useTabs": false,
+        "arrowParens": "avoid",
+        "parser": "typescript"
+      }
+    ]
+  }
+}

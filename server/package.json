@@ -1,0 +1,37 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "main": "./src/index.ts",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start-server": "nodemon --watch ./ -r dotenv-safe/config",
+    "build-server": "tsc"
+  },
+  "dependencies": {
+    "apollo-server-core": "^3.4.0",
+    "apollo-server-fastify": "^3.4.0",
+    "apollo-server-plugin-base": "^3.3.0",
+    "better-sqlite3": "^7.4.3",
+    "class-validator": "^0.13.1",
+    "dotenv-safe": "^8.2.0",
+    "envalid": "^7.2.1",
+    "fastify": "^3.22.1",
+    "fastify-auth": "^1.1.0",
+    "fastify-socket.io": "^2.0.1",
+    "graphql": "^15.6.1",
+    "jsonwebtoken": "^8.5.1",
+    "jwks-rsa": "^2.0.5",
+    "reflect-metadata": "^0.1.13",
+    "socket.io": "^4.3.1",
+    "type-graphql": "^1.1.1",
+    "typedi": "^0.10.0",
+    "typeorm": "^0.2.38"
+  },
+  "devDependencies": {
+    "@types/jsonwebtoken": "^8.5.5",
+    "@types/node": "^12.0.0",
+    "nodemon": "^2.0.14",
+    "ts-node": "^10.3.0"
+  }
+}

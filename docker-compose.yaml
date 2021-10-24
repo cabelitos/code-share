@@ -1,0 +1,46 @@
+version: '3.7'
+services:
+  code-share-site:
+    container_name: code-share-site
+    restart: always
+    build:
+        context: ./
+        target: client
+    networks:
+      - code-share-site
+    expose:
+      - "80"
+    depends_on:
+      - code-share-server
+
+  code-share-server:
+    restart: always
+    container_name: code-share-server
+    volumes:
+      - "db-data:/app/db"
+    environment:
+      - HOST=0.0.0.0
+      - PORT=4000
+      - GRAPHQL_PATH=/
+      - JWKS_URI="${JWKS_URI:?err}"
+      - ACCESS_TOKEN_EMAIL_CLAIN_NAME="${ACCESS_TOKEN_EMAIL_CLAIN_NAME:?err}"
+      - TYPEORM_CONNECTION=better-sqlite3
+      - TYPEORM_SYNCHRONIZE=1
+      - TYPEORM_DATABASE=/app/db/code-share.sqlite
+      - SOCKET_PATH=/editor
+    build:
+        context: ./
+        target: server
+    networks:
+      - code-share-server
+    expose:
+      - "4000"
+
+networks:
+  code-share-site:
+    external: true
+  code-share-server:
+    external: true
+
+volumes:
+  db-data:
