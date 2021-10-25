@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "proxy": "http://localhost:3000",
   "private": true,
+  "homepage": "https://www.cabelitos.com/code-share",
   "dependencies": {
     "@apollo/client": "^3.4.16",
     "@graphql-codegen/named-operations-object": "^2.1.0",

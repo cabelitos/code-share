@@ -53,6 +53,7 @@ const webAuth = new WebAuth({
   responseType: 'token id_token',
   scope: 'openid profile email',
   audience: process.env.REACT_APP_AUTH_AUDIANCE ?? '',
+  redirectUri: `${window.location.origin}${process.env.PUBLIC_URL}`,
 });
 
 const parseHash = () =>

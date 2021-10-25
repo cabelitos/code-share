@@ -21,7 +21,7 @@ const GlobalStyles = createGlobalStyle`
 `;
 
 const App: React.FC<{}> = () => (
-  <BrowserRouter>
+  <BrowserRouter basename={process.env.PUBLIC_URL}>
     <ThemeProvider>
       <AlertProvider>
         <AuthProvider>

@@ -41,7 +41,7 @@ const ApolloProvider: React.FC<{}> = ({ children }) => {
         });
       });
       const httpLink = createHttpLink({
-        uri: process.env.REACT_APP_SERVICE_URL,
+        uri: `${process.env.REACT_APP_SERVICE_URL}${process.env.REACT_APP_GRAPHQL_PATH}`,
       });
       const authLink = setContext((_, { headers }) => {
         const {
