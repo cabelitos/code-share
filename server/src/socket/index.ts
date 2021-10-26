@@ -12,8 +12,13 @@ const registerSocket = (app: FastifyInstance): FastifyInstance =>
     app.io.use(authMiddleware);
     app.io.use(joinInterview);
     app.io.on('connection', socket => handleSocketConnection(app.io, socket));
+    const closeSocketRoom = (interviewId: string): void => {
+      const broadcast = app.io.in(interviewId);
+      broadcast.emit('interviewEnded', true);
+      broadcast.disconnectSockets(true);
+    };
     app.addHook('preHandler', (request, _, next) => {
-      request.io = app.io;
+      request.closeSocketRoom = closeSocketRoom;
       next();
     });
   });

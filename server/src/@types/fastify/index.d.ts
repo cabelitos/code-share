@@ -1,5 +1,4 @@
 import { FastifyReply } from 'fastify';
-import type { Server } from 'socket.io';
 
 import { AuthContext } from '../../auth/types';
 
@@ -14,6 +13,6 @@ declare module 'fastify' {
 
   interface FastifyRequest {
     authCtx: AuthContext;
-    io: Server;
+    closeSocketRoom(interviewId: string): void;
   }
 }

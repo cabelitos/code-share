@@ -1,17 +1,16 @@
 import { FastifyRequest } from 'fastify';
-import type { Server } from 'socket.io';
 
 import type { AuthContext } from '../auth/types';
 
 export interface ContextData {
   authCtx: AuthContext;
-  io: Server;
+  closeSocketRoom: FastifyRequest['closeSocketRoom'];
 }
 
 const createContext = ({
-  request: { authCtx, io },
+  request: { authCtx, closeSocketRoom },
 }: {
   request: FastifyRequest;
-}): ContextData => ({ authCtx, io });
+}): ContextData => ({ authCtx, closeSocketRoom });
 
 export default createContext;

@@ -42,6 +42,9 @@ const Home: React.FC<{}> = () => {
         type: AlertType.ERROR,
       });
   }, [t, addAlert, onReallyOpenNotepad, interviewId]);
+  React.useEffect(() => {
+    if (!interviewId) onCloseNotepad();
+  }, [interviewId, onCloseNotepad]);
 
   const notepadTxt = t('notepad');
   const shutdownTxt = t('shutdown');

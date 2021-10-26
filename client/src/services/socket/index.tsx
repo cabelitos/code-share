@@ -4,6 +4,7 @@ import type { OnChange, OnMount } from '@monaco-editor/react';
 import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '../auth';
+import { useClearCurrentInterview } from '../../state/interview/currentInterview';
 import { useCurrentInterviewLazyQuery } from '../../state/__generated__';
 
 export enum ConnectionState {
@@ -34,6 +35,7 @@ const SocketProvider: React.FC<{}> = ({ children }) => {
     fetchPolicy: 'network-only',
   });
   const { authData } = useAuth();
+  const clearCurrentInterview = useClearCurrentInterview();
   const accessToken = authData?.accessToken;
   const [connectionState, setConnectionState] = React.useState(
     ConnectionState.DISCONNECTED,
@@ -90,6 +92,9 @@ const SocketProvider: React.FC<{}> = ({ children }) => {
           return prev;
         });
       });
+      socket.on('interviewEnded', () => {
+        clearCurrentInterview(interviewId);
+      });
       socket.on('participantLeft', email => {
         setParticipants(prev => prev.filter(e => e !== email));
       });
@@ -105,7 +110,7 @@ const SocketProvider: React.FC<{}> = ({ children }) => {
       socketRef.current = null;
       suppress.current = false;
     };
-  }, [data, accessToken, editor]);
+  }, [data, accessToken, editor, clearCurrentInterview]);
   const value = React.useMemo<SocketCtxData>(
     () => ({
       onEditorChanged: (

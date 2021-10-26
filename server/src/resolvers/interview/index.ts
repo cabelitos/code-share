@@ -28,11 +28,11 @@ export default class InterviewResolver {
   @Mutation(_ => Interview)
   async endInterview(
     @Arg('input') input: EndInterviewInput,
-    @Ctx() { io }: ContextData,
+    @Ctx() { closeSocketRoom }: ContextData,
   ): Promise<Interview> {
     const decodedId = input.decodedInterviewId;
     const r = await this.interviewService.endInterview(input);
-    io.in(decodedId).disconnectSockets(true);
+    closeSocketRoom(decodedId);
     return r;
   }
 
