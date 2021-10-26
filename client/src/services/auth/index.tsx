@@ -117,7 +117,7 @@ const AuthProvider: React.FC<{}> = ({ children }) => {
     React.useState<TokensDataWithPermissions | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
   const previousAuthData = usePrevious(authData);
-  const [vai, setVai] = React.useState(false);
+  const [isLoadingToken, setIsLoadingToken] = React.useState(false);
   const login = React.useCallback(
     (email: string) =>
       wrapAuth0Promise(
@@ -197,7 +197,7 @@ const AuthProvider: React.FC<{}> = ({ children }) => {
       authRefContext.current,
     )
       .catch(() => setAuthData(null))
-      .finally(() => setVai(true));
+      .finally(() => setIsLoadingToken(true));
   }, []);
 
   React.useEffect(() => {
@@ -210,7 +210,7 @@ const AuthProvider: React.FC<{}> = ({ children }) => {
 
   return (
     <AuthContext.Provider value={contextValue}>
-      {vai ? children : null}
+      {isLoadingToken ? children : null}
     </AuthContext.Provider>
   );
 };
