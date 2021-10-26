@@ -42,7 +42,12 @@ const SocketProvider: React.FC<{}> = ({ children }) => {
     null,
   );
   const { t } = useTranslation('notepad');
-  const [participants, setParticipants] = React.useState<string[]>([t('me')]);
+  const me = t('me');
+  const meRef = React.useRef(me);
+  meRef.current = me;
+  const [participants, setParticipants] = React.useState<string[]>([
+    meRef.current,
+  ]);
   const suppress = React.useRef(false);
 
   React.useEffect(() => {
@@ -89,6 +94,7 @@ const SocketProvider: React.FC<{}> = ({ children }) => {
         setParticipants(prev => prev.filter(e => e !== email));
       });
       socket.on('disconnect', () => {
+        setParticipants([meRef.current]);
         setConnectionState(ConnectionState.DISCONNECTED);
       });
       socketRef.current = socket;
