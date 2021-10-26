@@ -43,7 +43,7 @@ const SocketProvider: React.FC<{}> = ({ children }) => {
   );
   const { t } = useTranslation('notepad');
   const [participants, setParticipants] = React.useState<string[]>([t('me')]);
-  const maxVersionId = React.useRef(-1);
+  const suppress = React.useRef(false);
 
   React.useEffect(() => {
     if (accessToken) {
@@ -74,9 +74,10 @@ const SocketProvider: React.FC<{}> = ({ children }) => {
         socketRef.current = socket;
         setConnectionState(ConnectionState.CONNECTED);
       });
-      socket.on('editorChanged', ({ value, event, versionId }) => {
-        maxVersionId.current = Math.max(maxVersionId.current, versionId);
+      socket.on('editorChanged', ({ value, event }) => {
+        suppress.current = true;
         editor.executeEdits(value, event);
+        suppress.current = false;
       });
       socket.on('participantJoined', email => {
         setParticipants(prev => {
@@ -96,6 +97,7 @@ const SocketProvider: React.FC<{}> = ({ children }) => {
       socketRef.current?.disconnect();
       socketRef.current?.removeAllListeners();
       socketRef.current = null;
+      suppress.current = false;
     };
   }, [data, accessToken, editor]);
   const value = React.useMemo<SocketCtxData>(
@@ -104,10 +106,9 @@ const SocketProvider: React.FC<{}> = ({ children }) => {
         value: Parameters<OnChange>[0],
         { changes, versionId }: Parameters<OnChange>[1],
       ): void => {
-        if (versionId <= maxVersionId.current) {
+        if (suppress.current) {
           return;
         }
-        maxVersionId.current = versionId;
         socketRef.current?.emit('editorChanged', {
           value,
           event: changes,
