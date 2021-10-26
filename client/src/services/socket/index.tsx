@@ -4,7 +4,7 @@ import type { OnChange, OnMount } from '@monaco-editor/react';
 import { useTranslation } from 'react-i18next';
 
 import { useAuth } from '../auth';
-import { useCurrentInterviewQuery } from '../../state/__generated__';
+import { useCurrentInterviewLazyQuery } from '../../state/__generated__';
 
 export enum ConnectionState {
   CONNECTED = 'CONNECTED',
@@ -30,8 +30,11 @@ export const useSocket = (): SocketCtxData => React.useContext(SocketCtx);
 
 const SocketProvider: React.FC<{}> = ({ children }) => {
   const socketRef = React.useRef<Socket | null>(null);
-  const { data } = useCurrentInterviewQuery({ fetchPolicy: 'network-only' });
+  const [fetchCurrentInterview, { data }] = useCurrentInterviewLazyQuery({
+    fetchPolicy: 'network-only',
+  });
   const { authData } = useAuth();
+  const accessToken = authData?.accessToken;
   const [connectionState, setConnectionState] = React.useState(
     ConnectionState.DISCONNECTED,
   );
@@ -42,10 +45,16 @@ const SocketProvider: React.FC<{}> = ({ children }) => {
   const [participants, setParticipants] = React.useState<string[]>([t('me')]);
   const maxVersionId = React.useRef(-1);
 
+  React.useEffect(() => {
+    if (accessToken) {
+      fetchCurrentInterview();
+    }
+  }, [accessToken, fetchCurrentInterview]);
+
   React.useEffect((): (() => void) => {
     const interviewId = data?.currentInterview?.id;
     if (
-      authData?.accessToken &&
+      accessToken &&
       interviewId &&
       process.env.REACT_APP_SERVICE_URL &&
       editor
@@ -57,7 +66,7 @@ const SocketProvider: React.FC<{}> = ({ children }) => {
         },
         transports: ['websocket', 'polling'],
         auth: {
-          token: `Bearer ${authData.accessToken}`,
+          token: `Bearer ${accessToken}`,
         },
       });
       setConnectionState(ConnectionState.CONNECTING);
@@ -88,7 +97,7 @@ const SocketProvider: React.FC<{}> = ({ children }) => {
       socketRef.current?.removeAllListeners();
       socketRef.current = null;
     };
-  }, [data, authData, editor]);
+  }, [data, accessToken, editor]);
   const value = React.useMemo<SocketCtxData>(
     () => ({
       onEditorChanged: (
