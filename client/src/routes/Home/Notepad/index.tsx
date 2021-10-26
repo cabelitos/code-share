@@ -12,7 +12,7 @@ import { useSocket, ConnectionState } from '../../../services/socket';
 
 const NotepadIconStyled = <NotepadIcon variant="16x16_4" />;
 const defaultPosition = { x: 0, y: 0 };
-const defaultLanguagesList = ['javascript'];
+const defaultLanguagesList = ['typescript'];
 const defaultEditorOptions = {
   fontFamily: 'MS Sans Serif',
   fontSize: 15,
