@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Alert } from '@react95/core';
+import { Modal } from '@react95/core';
 import { Notepad as NotepadIcon } from '@react95/icons';
 import MonacoEditor, { useMonaco, OnMount } from '@monaco-editor/react';
 import { useTranslation } from 'react-i18next';
@@ -9,6 +9,7 @@ import { animated, SpringValue } from '@react-spring/web';
 import LanguagesSelector from './LanguagesSelector';
 import Participants from './Participants';
 import { useSocket, ConnectionState } from '../../../services/socket';
+import useDebounced from '../../../hooks/useDebounced';
 
 const NotepadIconStyled = <NotepadIcon variant="16x16_4" />;
 const defaultPosition = { x: 0, y: 0 };
@@ -39,8 +40,21 @@ const Content = styled.div`
   display: flex;
 `;
 
-const noOp = () => {};
-const noButtons: never[] = [];
+const BlockerMessage = styled.div`
+  align-items: center;
+  background: rgba(0, 0, 0, 0.5);
+  bottom: 0;
+  display: flex;
+  justify-content: center;
+  left: 0;
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  right: 0;
+  top: 0;
+  color: rgb(255, 255, 255);
+  pointer-events: none;
+`;
 
 interface NotepadProps {
   onClose: () => void;
@@ -51,7 +65,7 @@ interface NotepadProps {
   title: string;
 }
 
-const Notepad: React.FC<NotepadProps> = ({ onClose, title, style }) => {
+const Notepad: React.FC<NotepadProps> = ({ onClose, style, title }) => {
   const { t } = useTranslation('notepad');
   const monaco = useMonaco();
   const languageStr = t('languages');
@@ -59,6 +73,7 @@ const Notepad: React.FC<NotepadProps> = ({ onClose, title, style }) => {
   const { onEditorChanged, onSetEditor, connectionState } = useSocket();
   const onSetEditorRef = React.useRef(onSetEditor);
   onSetEditorRef.current = onSetEditor;
+  const debouncedConnectedState = useDebounced(connectionState);
 
   const menu = React.useMemo(() => {
     const languagesList = (
@@ -75,7 +90,7 @@ const Notepad: React.FC<NotepadProps> = ({ onClose, title, style }) => {
     return [{ name: languageStr, list: languagesList }];
   }, [monaco, languageStr, language]);
 
-  const isConnected = connectionState === ConnectionState.CONNECTED;
+  const isConnected = debouncedConnectedState === ConnectionState.CONNECTED;
   const editorOptions = React.useMemo(
     () => ({
       ...defaultEditorOptions,
@@ -120,16 +135,10 @@ const Notepad: React.FC<NotepadProps> = ({ onClose, title, style }) => {
           defaultLanguage={language}
           options={editorOptions}
         />
-        {!isConnected && (
-          <Alert
-            buttons={noButtons}
-            closeAlert={noOp}
-            message={t('noConnectionMessage')}
-            title={t('noConnection')}
-            type="warning"
-          />
-        )}
         <Participants />
+        {!isConnected && (
+          <BlockerMessage>{t('noConnectionMessage')}</BlockerMessage>
+        )}
       </Content>
     </StyledModal>
   );
