@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import { useAuth } from '../auth';
 import { AlertType, useAlert } from '../alert';
 import { useLoading } from '../loading';
+import usePrevious from '../../hooks/usePrevious';
 
 const ApolloProvider: React.FC<{}> = ({ children }) => {
   const useAuthData = useAuth();
@@ -30,6 +31,7 @@ const ApolloProvider: React.FC<{}> = ({ children }) => {
   ctxRef.current = { alertTitle, addAlert, useAuthData, useLoadingData };
 
   const clientRef = React.useRef<ApolloClient<unknown> | null>(null);
+  const previousAuthData = usePrevious(useAuthData.authData);
 
   const getInstance = React.useCallback((): ApolloClient<unknown> => {
     if (!clientRef.current) {
@@ -93,6 +95,13 @@ const ApolloProvider: React.FC<{}> = ({ children }) => {
   }, []);
 
   const client = getInstance();
+  React.useEffect(() => {
+    if (previousAuthData && !useAuthData.authData) {
+      client.stop();
+      // eslint-disable-next-line no-console
+      client.clearStore().catch(console.error);
+    }
+  }, [client, previousAuthData, useAuthData.authData]);
   return <RealApolloProvider client={client}>{children}</RealApolloProvider>;
 };
 
