@@ -55,6 +55,7 @@
     "react/jsx-one-expression-per-line": "off",
     "react/jsx-props-no-spreading": "off",
     "import/no-cycle": "error",
+    "require-await": "error",
     "import/no-unresolved": "error",
     "@typescript-eslint/no-empty-function": "off",
     "no-underscore-dangle": "off",

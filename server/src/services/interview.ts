@@ -27,7 +27,7 @@ const wrapInTransaction =
 
 @Service()
 export default class InterviewService {
-  async createInterviewParticipant(
+  createInterviewParticipant(
     manager: EntityManager,
     interviewId: string,
     user: string,
