@@ -4,7 +4,7 @@ WORKDIR /app
 COPY . /app
 RUN apk add --no-cache build-base python3 && yarn install && yarn build
 
-FROM nginx:alpine as client
+FROM nginx:1.21.3-alpine as client
 
 WORKDIR /
 RUN rm -rf /usr/share/nginx/html/*
