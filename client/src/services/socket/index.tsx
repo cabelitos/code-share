@@ -66,6 +66,7 @@ const SocketProvider: React.FC<{}> = ({ children }) => {
       process.env.REACT_APP_SERVICE_URL &&
       editor
     ) {
+      let ended = false;
       const socket = io(process.env.REACT_APP_SERVICE_URL, {
         path: process.env.REACT_APP_SOCKET_PATH,
         query: {
@@ -93,12 +94,16 @@ const SocketProvider: React.FC<{}> = ({ children }) => {
         });
       });
       socket.on('interviewEnded', () => {
+        ended = true;
         clearCurrentInterview(interviewId);
       });
       socket.on('participantLeft', email => {
         setParticipants(prev => prev.filter(e => e !== email));
       });
-      socket.on('disconnect', () => {
+      socket.on('disconnect', reason => {
+        if (reason === 'io server disconnect' && !ended) {
+          socket.connect();
+        }
         setParticipants([meRef.current]);
         setConnectionState(ConnectionState.DISCONNECTED);
       });
