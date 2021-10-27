@@ -22,7 +22,12 @@ import getPermissions, { Permissions } from './permissions';
 type TokensDataWithPermissions = TokensData & { permissions: Set<string> };
 
 interface AuthContextData {
-  login: (email: string) => Promise<void>;
+  sendLoginEmail: (
+    email: string,
+    successTitle: string,
+    successMessage: string,
+    shouldTriggerLoading?: boolean,
+  ) => Promise<void>;
   logout: () => void;
   hasPermission: (permission: Permissions) => boolean;
   isLoading: boolean;
@@ -37,7 +42,7 @@ interface AuthRefContext {
 }
 
 const AuthContext = React.createContext<AuthContextData>({
-  login: (_: string) => Promise.reject(new Error('Missing context')),
+  sendLoginEmail: (_: string) => Promise.reject(new Error('Missing context')),
   logout: () => {
     throw new Error('Missing context');
   },
@@ -56,10 +61,17 @@ const webAuth = new WebAuth({
   redirectUri: `${window.location.origin}${process.env.PUBLIC_URL}`,
 });
 
+const removeStateFromHash = (hash: string): string =>
+  hash.replace(/&state=.+&/, '&');
+
 const parseHash = () =>
   new Promise<Auth0DecodedHash | null>((resolve, reject) => {
     try {
       webAuth.parseHash(
+        {
+          hash: removeStateFromHash(window.location.hash),
+          __enableIdPInitiatedLogin: true,
+        },
         (
           err: Auth0ParseHashError | null,
           authData: Auth0DecodedHash | null,
@@ -118,12 +130,17 @@ const AuthProvider: React.FC<{}> = ({ children }) => {
   const [isLoading, setIsLoading] = React.useState(true);
   const previousAuthData = usePrevious(authData);
   const [isLoadingToken, setIsLoadingToken] = React.useState(false);
-  const login = React.useCallback(
-    (email: string) =>
+  const sendLoginEmail = React.useCallback(
+    (
+      email: string,
+      successTitle: string,
+      successMessage: string,
+      shouldTriggerLoading = true,
+    ) =>
       wrapAuth0Promise(
         new Promise<void>((resolve, reject) => {
           try {
-            setIsLoading(true);
+            if (shouldTriggerLoading) setIsLoading(true);
             webAuth.passwordlessStart(
               {
                 connection: 'email',
@@ -139,8 +156,8 @@ const AuthProvider: React.FC<{}> = ({ children }) => {
               },
             );
             authRefContext.current.useAlertCtx.addAlert({
-              message: authRefContext.current.t('emailSentMessage'),
-              title: authRefContext.current.t('emailSentTitle'),
+              message: successMessage,
+              title: successTitle,
               type: AlertType.INFO,
             });
           } catch (err) {
@@ -154,9 +171,9 @@ const AuthProvider: React.FC<{}> = ({ children }) => {
     [],
   );
 
-  const contextValue = React.useMemo(
+  const contextValue = React.useMemo<AuthContextData>(
     () => ({
-      login,
+      sendLoginEmail,
       isLoading,
       isAuthenticated: !!authData,
       authData,
@@ -167,7 +184,7 @@ const AuthProvider: React.FC<{}> = ({ children }) => {
         setAuthData(null);
       },
     }),
-    [login, isLoading, authData],
+    [sendLoginEmail, isLoading, authData],
   );
 
   React.useEffect(() => {

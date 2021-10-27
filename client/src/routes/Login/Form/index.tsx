@@ -34,15 +34,21 @@ const Form: React.FC<{}> = () => {
   const { t } = useTranslation('login');
 
   const [email, onEmailChanged] = useOnInputValue('');
-  const { login } = useAuth();
+  const { sendLoginEmail } = useAuth();
 
   const onLogin = React.useCallback(
     e => {
       e.preventDefault();
       const trimmedEmail = email.trim();
-      if (trimmedEmail !== '') login(trimmedEmail);
+      if (trimmedEmail !== '') {
+        sendLoginEmail(
+          trimmedEmail,
+          t('emailSentTitle'),
+          t('emailSentMessage'),
+        );
+      }
     },
-    [login, email],
+    [sendLoginEmail, email, t],
   );
 
   return (

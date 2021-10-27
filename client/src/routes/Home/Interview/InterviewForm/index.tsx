@@ -31,6 +31,7 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
   label,
   buttonText,
   onSubmit,
+  children,
 }) => {
   const isMountedRef = useIsMounted();
   const [value, onValueChanged, resetValue] = useOnInputValue('');
@@ -57,6 +58,7 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
         text={value}
         onTextChanged={onValueChanged}
       />
+      {children}
       <ButtonContainer>
         <Submit disabled={isDisabled} onClick={onJoinInterview}>
           {buttonText}

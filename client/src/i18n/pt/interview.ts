@@ -8,6 +8,9 @@ const interview = {
   intervieweeEmail: 'E-mail do entrevistado',
   create: 'Criar',
   createOrJoinInterview: 'Crie ou entre em uma entrevista para ver o código',
+  sendLoginLink: 'Enviar email com link de acesso ao candidato',
+  sendLoginLinkSuccessTitle: 'Sucesso',
+  bbsendLoginLinkSuccessMessage: 'Email enviado com sucesso',
 };
 
 export default interview;
