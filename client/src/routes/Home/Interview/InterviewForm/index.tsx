@@ -4,6 +4,7 @@ import styled from 'styled-components';
 import FormInput from '../../../../components/FormInput';
 import Submit from '../Submit';
 import useOnInputValue from '../../../../hooks/useOnInputValue';
+import useIsMounted from '../../../../hooks/useIsMounted';
 
 const StyledForm = styled.form`
   display: flex;
@@ -31,6 +32,7 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
   buttonText,
   onSubmit,
 }) => {
+  const isMountedRef = useIsMounted();
   const [value, onValueChanged, resetValue] = useOnInputValue('');
   const onJoinInterview = React.useCallback(
     e => {
@@ -40,9 +42,11 @@ const InterviewForm: React.FC<InterviewFormProps> = ({
       if (trimmedValue === '') {
         return;
       }
-      onSubmit(trimmedValue).then(resetValue);
+      onSubmit(trimmedValue).then(() => {
+        if (isMountedRef.current) resetValue();
+      });
     },
-    [value, isDisabled, onSubmit, resetValue],
+    [value, isDisabled, onSubmit, resetValue, isMountedRef],
   );
   return (
     <StyledForm>
