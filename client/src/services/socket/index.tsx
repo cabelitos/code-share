@@ -2,6 +2,7 @@ import React from 'react';
 import io, { Socket } from 'socket.io-client';
 import type { OnChange, OnMount } from '@monaco-editor/react';
 import { useTranslation } from 'react-i18next';
+import type { editor } from 'monaco-editor';
 
 import { useAuth } from '../auth';
 import { useClearCurrentInterview } from '../../state/interview/currentInterview';
@@ -92,7 +93,13 @@ const SocketProvider: React.FC<{}> = ({ children }) => {
       });
       socket.on('editorChanged', ({ value, event }) => {
         suppress.current = true;
-        editor.executeEdits(value, event);
+        editor.executeEdits(
+          value,
+          event.map((e: editor.IIdentifiedSingleEditOperation) => ({
+            ...e,
+            forceMoveMarkers: true,
+          })),
+        );
         suppress.current = false;
       });
       socket.on('participantJoined', email => {
