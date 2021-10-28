@@ -30,14 +30,18 @@ export default class InterviewService {
   createInterviewParticipant(
     manager: EntityManager,
     interviewId: string,
-    user: string,
+    users: string[],
   ): Promise<InsertResult> {
     return manager
       .createQueryBuilder()
       .insert()
       .orIgnore()
       .into(InterviewParticipant)
-      .values(manager.create(InterviewParticipant, { user, interviewId }))
+      .values(
+        users.map(user =>
+          manager.create(InterviewParticipant, { user, interviewId }),
+        ),
+      )
       .updateEntity(false)
       .execute();
   }
@@ -52,7 +56,10 @@ export default class InterviewService {
         Interview,
         manager.create(Interview, { ...input, createdBy }),
       );
-      await this.createInterviewParticipant(manager, interview._id, createdBy);
+      await this.createInterviewParticipant(manager, interview._id, [
+        createdBy,
+        input.interviewee,
+      ]);
       return interview;
     },
   );
@@ -76,7 +83,7 @@ export default class InterviewService {
         findArgs.interviewee = email;
       }
       const interview = await manager.findOneOrFail(Interview, findArgs);
-      await this.createInterviewParticipant(manager, id, email);
+      await this.createInterviewParticipant(manager, id, [email]);
       return interview;
     },
   );
