@@ -11,11 +11,15 @@ const registerSocket = (app: FastifyInstance): FastifyInstance =>
     if (err) return;
     app.io.use(authMiddleware);
     app.io.use(joinInterview);
-    app.io.on('connection', socket => handleSocketConnection(app.io, socket));
+    const languagePerRoom: Record<string, unknown> = {};
+    app.io.on('connection', socket =>
+      handleSocketConnection(app.io, socket, languagePerRoom),
+    );
     const closeSocketRoom = (interviewId: string): void => {
       const broadcast = app.io.in(interviewId);
       broadcast.emit('interviewEnded', true);
       broadcast.disconnectSockets(true);
+      delete languagePerRoom[interviewId];
     };
     app.addHook('preHandler', (request, _, next) => {
       request.closeSocketRoom = closeSocketRoom;

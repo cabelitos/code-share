@@ -3,13 +3,15 @@ import Container from 'typedi';
 
 import InterviewService from '../services/interview';
 
-const event = 'editorChanged';
+const editorChanged = 'editorChanged';
 const participantJoined = 'participantJoined';
 const participantLeft = 'participantLeft';
+const onLanguageChanged = 'onLanguageChanged';
 
 const handleSocketConnection = async (
   io: Server,
   socket: Socket,
+  languagePerRoom: Record<string, unknown>,
 ): Promise<void> => {
   const {
     joinInterviewInput,
@@ -20,7 +22,9 @@ const handleSocketConnection = async (
 
   try {
     const diffs = await service.getInterviewDiff(interviewId);
-    diffs.forEach(data => socket.emit(event, data));
+    diffs.forEach(data => socket.emit(editorChanged, data));
+    const languageData = languagePerRoom[interviewId];
+    if (languageData) socket.emit(onLanguageChanged, languageData);
 
     const sockets = await io.in(interviewId).fetchSockets();
     sockets.forEach(s => socket.emit(participantJoined, s.data.authCtx.email));
@@ -32,15 +36,20 @@ const handleSocketConnection = async (
       socket.removeAllListeners();
     });
 
-    socket.on(event, async (data): Promise<void> => {
+    socket.on(editorChanged, async (data): Promise<void> => {
       try {
         await service.createInterviewDiff(data, email, interviewId);
-        socket.to(interviewId).emit(event, data);
+        socket.to(interviewId).emit(editorChanged, data);
       } catch (err) {
         // eslint-disable-next-line no-console
         console.error(`An error has happenned disconnecting socket`, err);
         socket.disconnect();
       }
+    });
+
+    socket.on(onLanguageChanged, data => {
+      languagePerRoom[interviewId] = data;
+      socket.to(interviewId).emit(onLanguageChanged, data);
     });
   } catch (err) {
     // eslint-disable-next-line no-console

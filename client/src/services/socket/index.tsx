@@ -18,13 +18,19 @@ interface SocketCtxData {
   participants: string[];
   connectionState: ConnectionState;
   onSetEditor: (editor: Parameters<OnMount>[0] | null) => void;
+  onLanguageChanged: (language: string) => void;
+  language: string;
 }
+
+const defaultLanguage = 'typescript';
 
 const SocketCtx = React.createContext<SocketCtxData>({
   onEditorChanged: () => {},
   participants: [],
   connectionState: ConnectionState.DISCONNECTED,
   onSetEditor: () => {},
+  onLanguageChanged: () => {},
+  language: defaultLanguage,
 });
 
 export const useSocket = (): SocketCtxData => React.useContext(SocketCtx);
@@ -40,6 +46,7 @@ const SocketProvider: React.FC<{}> = ({ children }) => {
   const [connectionState, setConnectionState] = React.useState(
     ConnectionState.DISCONNECTED,
   );
+  const [language, setLanguage] = React.useState(defaultLanguage);
   const [editor, onSetEditor] = React.useState<null | Parameters<OnMount>[0]>(
     null,
   );
@@ -107,6 +114,9 @@ const SocketProvider: React.FC<{}> = ({ children }) => {
         setParticipants([meRef.current]);
         setConnectionState(ConnectionState.DISCONNECTED);
       });
+      socket.on('onLanguageChanged', ({ language }) => {
+        setLanguage(language);
+      });
       socketRef.current = socket;
     }
     return (): void => {
@@ -132,10 +142,15 @@ const SocketProvider: React.FC<{}> = ({ children }) => {
         });
       },
       participants,
+      language,
       connectionState,
       onSetEditor: editor => onSetEditor(editor),
+      onLanguageChanged: (language: string) => {
+        setLanguage(language);
+        socketRef.current?.emit('onLanguageChanged', { language });
+      },
     }),
-    [connectionState, participants],
+    [connectionState, participants, language],
   );
   return <SocketCtx.Provider value={value}>{children}</SocketCtx.Provider>;
 };

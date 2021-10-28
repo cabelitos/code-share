@@ -13,7 +13,6 @@ import useDebounced from '../../hooks/useDebounced';
 
 const NotepadIconStyled = <NotepadIcon variant="16x16_4" />;
 const defaultPosition = { x: 0, y: 0 };
-const defaultLanguagesList = ['typescript'];
 const defaultEditorOptions = {
   fontFamily: 'MS Sans Serif',
   fontSize: 15,
@@ -76,26 +75,37 @@ const Notepad: React.FC<NotepadProps> = ({
   const { t } = useTranslation('notepad');
   const monaco = useMonaco();
   const languageStr = t('languages');
-  const [language, setLanguage] = React.useState(defaultLanguagesList[0]);
-  const { onEditorChanged, onSetEditor, connectionState } = useSocket();
+  const {
+    onEditorChanged,
+    onSetEditor,
+    connectionState,
+    onLanguageChanged: onLanguageChangedSocket,
+    language,
+  } = useSocket();
   const onSetEditorRef = React.useRef(onSetEditor);
   onSetEditorRef.current = onSetEditor;
+  const onLanguageChangedRef = React.useRef(onLanguageChangedSocket);
+  onLanguageChangedRef.current = onLanguageChangedSocket;
   const debouncedConnectedState = useDebounced(connectionState);
+
+  const onLanguageChanged = React.useCallback((language: string) => {
+    onLanguageChangedRef.current(language);
+  }, []);
 
   const menu = React.useMemo(() => {
     const languagesList = (
       <LanguagesSelector
         selectedLanguage={language}
-        onLanguageChanged={setLanguage}
+        onLanguageChanged={onLanguageChanged}
         languages={
           monaco
             ? monaco.languages.getLanguages().map(({ id }) => id)
-            : defaultLanguagesList
+            : [language]
         }
       />
     );
     return [{ name: languageStr, list: languagesList }];
-  }, [monaco, languageStr, language]);
+  }, [monaco, languageStr, language, onLanguageChanged]);
 
   const isConnected = debouncedConnectedState === ConnectionState.CONNECTED;
   const editorOptions = React.useMemo(
