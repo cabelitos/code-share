@@ -8,8 +8,8 @@ import { animated, SpringValue } from '@react-spring/web';
 
 import LanguagesSelector from './LanguagesSelector';
 import Participants from './Participants';
-import { useSocket, ConnectionState } from '../../../services/socket';
-import useDebounced from '../../../hooks/useDebounced';
+import { useSocket, ConnectionState } from '../../services/socket';
+import useDebounced from '../../hooks/useDebounced';
 
 const NotepadIconStyled = <NotepadIcon variant="16x16_4" />;
 const defaultPosition = { x: 0, y: 0 };
@@ -21,8 +21,9 @@ const defaultEditorOptions = {
   minimap: { enabled: false },
 };
 
-const StyledModal = styled(animated(Modal))`
-  height: calc(100% - 28px);
+const StyledModal = styled(animated(Modal))<{ isFullscreen: boolean }>`
+  height: ${({ isFullscreen }) =>
+    isFullscreen ? '100%;' : 'calc(100% - 28px);'};
   margin: 0;
   padding: 0;
   position: absolute;
@@ -63,9 +64,15 @@ interface NotepadProps {
     transform: SpringValue<string>;
   };
   title: string;
+  isFullscreen?: boolean;
 }
 
-const Notepad: React.FC<NotepadProps> = ({ onClose, style, title }) => {
+const Notepad: React.FC<NotepadProps> = ({
+  onClose,
+  style,
+  title,
+  isFullscreen = false,
+}) => {
   const { t } = useTranslation('notepad');
   const monaco = useMonaco();
   const languageStr = t('languages');
@@ -120,6 +127,7 @@ const Notepad: React.FC<NotepadProps> = ({ onClose, style, title }) => {
 
   return (
     <StyledModal
+      isFullscreen={isFullscreen}
       style={style}
       defaultPosition={defaultPosition}
       icon={NotepadIconStyled}

@@ -3,7 +3,7 @@ import { Fieldset, Tree } from '@react95/core';
 import { useTranslation } from 'react-i18next';
 import { User } from '@react95/icons';
 import styled from 'styled-components';
-import { useSocket } from '../../../../services/socket';
+import { useSocket } from '../../../services/socket';
 
 const UserIconStyled = <User variant="16x16_4" />;
 

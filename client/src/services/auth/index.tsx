@@ -221,7 +221,11 @@ const AuthProvider: React.FC<{}> = ({ children }) => {
     if (!authData && previousAuthData) {
       authRefContext.current.history.replace(routeNames.login);
     } else if (!previousAuthData && authData) {
-      authRefContext.current.history.replace(routeNames.home);
+      if (!authData.permissions.size) {
+        authRefContext.current.history.replace(routeNames.notepad);
+      } else {
+        authRefContext.current.history.replace(routeNames.home);
+      }
     }
   }, [authData, previousAuthData]);
 

@@ -2,14 +2,16 @@ import React from 'react';
 import { Alert, TaskBar, List } from '@react95/core';
 import { useTranslation } from 'react-i18next';
 import { Computer3, Notepad as NotepadIcon, User } from '@react95/icons';
+import { Redirect } from 'react-router-dom';
 
-import Notepad from './Notepad';
+import Notepad from '../../components/Notepad';
 import Interview from './Interview';
 import { useAuth } from '../../services/auth';
 import useIsOpen from './hooks/useIsOpen';
 import VisibilityTransitioner from '../../components/VisibilityTransitioner';
 import { useCurrentInterviewQuery } from '../../state/__generated__';
 import { useAlert, AlertType } from '../../services/alert';
+import routeNames from '../routeNames';
 
 const ComputerIconStyled = <Computer3 variant="32x32_4" />;
 const NotepadIconStyled = <NotepadIcon variant="32x32_4" />;
@@ -26,7 +28,7 @@ const animationProps = {
 
 const Home: React.FC<{}> = () => {
   const { t } = useTranslation('home');
-  const { logout } = useAuth();
+  const { logout, authData } = useAuth();
   const { addAlert } = useAlert();
   const { data } = useCurrentInterviewQuery({ fetchPolicy: 'network-only' });
   const interviewId = data?.currentInterview?.id ?? null;
@@ -80,6 +82,9 @@ const Home: React.FC<{}> = () => {
     ],
     [t, onCloseExitAlert, logout],
   );
+  if (!authData?.permissions.size) {
+    return <Redirect to={routeNames.notepad} />;
+  }
   return (
     <>
       {isExitAlertOpen && (

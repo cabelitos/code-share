@@ -4,6 +4,7 @@ import { Route } from 'react-router-dom';
 import ProtectedRoute from '../components/ProtectedRoute';
 import Login from './Login';
 import Home from './Home';
+import Notepad from './Notepad';
 import routeNames from './routeNames';
 
 const routes: (RouteProps & {
@@ -15,6 +16,12 @@ const routes: (RouteProps & {
     key: routeNames.login,
     path: routeNames.login,
     routeComponent: Route,
+  },
+  {
+    component: Notepad,
+    key: routeNames.notepad,
+    path: routeNames.notepad,
+    routeComponent: ProtectedRoute,
   },
   {
     component: Home,
