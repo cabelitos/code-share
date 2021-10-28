@@ -108,13 +108,6 @@ const Notepad: React.FC<NotepadProps> = ({
   }, [monaco, languageStr, language, onLanguageChanged]);
 
   const isConnected = debouncedConnectedState === ConnectionState.CONNECTED;
-  const editorOptions = React.useMemo(
-    () => ({
-      ...defaultEditorOptions,
-      readOnly: !isConnected,
-    }),
-    [isConnected],
-  );
 
   React.useEffect(() => {
     const model = monaco?.editor.getModels()[0];
@@ -151,7 +144,7 @@ const Notepad: React.FC<NotepadProps> = ({
           onMount={onMount}
           onChange={onEditorChanged}
           defaultLanguage={language}
-          options={editorOptions}
+          options={defaultEditorOptions}
         />
         <Participants />
         {!isConnected && (

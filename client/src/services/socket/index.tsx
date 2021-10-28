@@ -88,6 +88,7 @@ const SocketProvider: React.FC<{}> = ({ children }) => {
       socket.on('connect', () => {
         socketRef.current = socket;
         setConnectionState(ConnectionState.CONNECTED);
+        editor.updateOptions({ readOnly: false });
       });
       socket.on('editorChanged', ({ value, event }) => {
         suppress.current = true;
@@ -113,6 +114,7 @@ const SocketProvider: React.FC<{}> = ({ children }) => {
         }
         setParticipants([meRef.current]);
         setConnectionState(ConnectionState.DISCONNECTED);
+        editor.updateOptions({ readOnly: true });
       });
       socket.on('onLanguageChanged', ({ language }) => {
         setLanguage(language);
@@ -144,7 +146,7 @@ const SocketProvider: React.FC<{}> = ({ children }) => {
       participants,
       language,
       connectionState,
-      onSetEditor: editor => onSetEditor(editor),
+      onSetEditor,
       onLanguageChanged: (language: string) => {
         setLanguage(language);
         socketRef.current?.emit('onLanguageChanged', { language });
