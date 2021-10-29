@@ -15,6 +15,7 @@ import { useAuth } from '../auth';
 import { AlertType, useAlert } from '../alert';
 import { useLoading } from '../loading';
 import usePrevious from '../../hooks/usePrevious';
+import useUpdatedRef from '../../hooks/useUpdatedRef';
 
 const ApolloProvider: React.FC<{}> = ({ children }) => {
   const useAuthData = useAuth();
@@ -22,13 +23,12 @@ const ApolloProvider: React.FC<{}> = ({ children }) => {
   const { addAlert } = useAlert();
   const { t } = useTranslation('login');
   const alertTitle = t('error');
-  const ctxRef = React.useRef({
+  const ctxRef = useUpdatedRef({
     alertTitle,
     addAlert,
     useAuthData,
     useLoadingData,
   });
-  ctxRef.current = { alertTitle, addAlert, useAuthData, useLoadingData };
 
   const clientRef = React.useRef<ApolloClient<unknown> | null>(null);
   const previousAuthData = usePrevious(useAuthData.authData);
@@ -92,7 +92,7 @@ const ApolloProvider: React.FC<{}> = ({ children }) => {
       });
     }
     return clientRef.current;
-  }, []);
+  }, [ctxRef]);
 
   const client = getInstance();
   React.useEffect(() => {

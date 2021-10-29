@@ -10,6 +10,7 @@ import LanguagesSelector from './LanguagesSelector';
 import Participants from './Participants';
 import { useSocket, ConnectionState } from '../../services/socket';
 import useDebounced from '../../hooks/useDebounced';
+import useUpdatedRef from '../../hooks/useUpdatedRef';
 
 const NotepadIconStyled = <NotepadIcon variant="16x16_4" />;
 const defaultPosition = { x: 0, y: 0 };
@@ -81,15 +82,16 @@ const Notepad: React.FC<NotepadProps> = ({
     onLanguageChanged: onLanguageChangedSocket,
     language,
   } = useSocket();
-  const onSetEditorRef = React.useRef(onSetEditor);
-  onSetEditorRef.current = onSetEditor;
-  const onLanguageChangedRef = React.useRef(onLanguageChangedSocket);
-  onLanguageChangedRef.current = onLanguageChangedSocket;
+  const onSetEditorRef = useUpdatedRef(onSetEditor);
+  const onLanguageChangedRef = useUpdatedRef(onLanguageChangedSocket);
   const debouncedConnectedState = useDebounced(connectionState);
 
-  const onLanguageChanged = React.useCallback((language: string) => {
-    onLanguageChangedRef.current(language);
-  }, []);
+  const onLanguageChanged = React.useCallback(
+    (language: string) => {
+      onLanguageChangedRef.current(language);
+    },
+    [onLanguageChangedRef],
+  );
 
   const menu = React.useMemo(() => {
     const languagesList = (
@@ -121,11 +123,12 @@ const Notepad: React.FC<NotepadProps> = ({
     [onSetEditorRef],
   );
 
-  React.useEffect(() => {
-    return () => {
+  React.useEffect(
+    () => () => {
       onSetEditorRef.current(null);
-    };
-  }, []);
+    },
+    [onSetEditorRef],
+  );
 
   return (
     <StyledModal

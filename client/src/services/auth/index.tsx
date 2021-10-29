@@ -11,6 +11,7 @@ import { useHistory } from 'react-router-dom';
 import { useAlert, AlertType } from '../alert';
 import routeNames from '../../routes/routeNames';
 import usePrevious from '../../hooks/usePrevious';
+import useUpdatedRef from '../../hooks/useUpdatedRef';
 import {
   saveTokensToStorage,
   loadTokensFromStorage,
@@ -118,12 +119,11 @@ const AuthProvider: React.FC<{}> = ({ children }) => {
   const useAlertCtx = useAlert();
   const { t } = useTranslation('login');
   const history = useHistory();
-  const authRefContext = React.useRef<AuthRefContext>({
+  const authRefContext = useUpdatedRef<AuthRefContext>({
     useAlertCtx,
     t,
     history,
   });
-  authRefContext.current = { useAlertCtx, t, history };
 
   const [authData, setAuthData] =
     React.useState<TokensDataWithPermissions | null>(null);
@@ -168,7 +168,7 @@ const AuthProvider: React.FC<{}> = ({ children }) => {
         authRefContext.current,
         // eslint-disable-next-line no-console
       ).catch(console.error),
-    [],
+    [authRefContext],
   );
 
   const contextValue = React.useMemo<AuthContextData>(
@@ -215,7 +215,7 @@ const AuthProvider: React.FC<{}> = ({ children }) => {
     )
       .catch(() => setAuthData(null))
       .finally(() => setIsLoadingToken(true));
-  }, []);
+  }, [authRefContext]);
 
   React.useEffect(() => {
     if (!authData && previousAuthData) {
@@ -227,7 +227,7 @@ const AuthProvider: React.FC<{}> = ({ children }) => {
         authRefContext.current.history.replace(routeNames.home);
       }
     }
-  }, [authData, previousAuthData]);
+  }, [authData, previousAuthData, authRefContext]);
 
   return (
     <AuthContext.Provider value={contextValue}>

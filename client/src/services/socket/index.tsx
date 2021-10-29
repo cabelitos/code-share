@@ -7,6 +7,7 @@ import type { editor } from 'monaco-editor';
 import { useAuth } from '../auth';
 import { useClearCurrentInterview } from '../../state/interview/currentInterview';
 import { useCurrentInterviewLazyQuery } from '../../state/__generated__';
+import useUpdatedRef from '../../hooks/useUpdatedRef';
 
 export enum ConnectionState {
   CONNECTED = 'CONNECTED',
@@ -53,8 +54,7 @@ const SocketProvider: React.FC<{}> = ({ children }) => {
   );
   const { t } = useTranslation('notepad');
   const me = t('me');
-  const meRef = React.useRef(me);
-  meRef.current = me;
+  const meRef = useUpdatedRef(me);
   const [participants, setParticipants] = React.useState<string[]>([
     meRef.current,
   ]);
@@ -134,7 +134,7 @@ const SocketProvider: React.FC<{}> = ({ children }) => {
       socketRef.current = null;
       suppress.current = false;
     };
-  }, [data, accessToken, editor, clearCurrentInterview]);
+  }, [data, accessToken, editor, clearCurrentInterview, meRef]);
   const value = React.useMemo<SocketCtxData>(
     () => ({
       onEditorChanged: (
