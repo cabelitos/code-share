@@ -1,20 +1,10 @@
 import React from 'react';
-import { Alert } from '@react95/core';
-import { useTransition, animated } from '@react-spring/web';
-import { useTranslation } from 'react-i18next';
+import { useTransition } from '@react-spring/web';
 
-export enum AlertType {
-  ERROR = 'error',
-  INFO = 'info',
-}
+import Alert from './Alert';
+import { AlertData } from './type';
 
-interface AlertData {
-  message: string;
-  title: string;
-  type: AlertType;
-}
-
-const AnimatedAlert = animated(Alert);
+export * from './type';
 
 interface AddAlertContext {
   addAlert: (alertData: AlertData) => void;
@@ -38,7 +28,6 @@ interface AlertState {
 }
 
 const AlertProvider: React.FC<{}> = ({ children }) => {
-  const { t } = useTranslation('login');
   const [{ alertList, currentAlert }, setAlertListCtx] =
     React.useState<AlertState>({
       alertList: [],
@@ -69,24 +58,16 @@ const AlertProvider: React.FC<{}> = ({ children }) => {
     () => setAlertListCtx(prev => ({ ...prev, currentAlert: null })),
     [],
   );
-  const okTxt = t('ok');
-  const alertButtons = React.useMemo(
-    () => [{ value: okTxt, onClick: onCloseAlert }],
-    [onCloseAlert, okTxt],
-  );
   return (
     <AlertContext.Provider value={alertContextValue}>
       {children}
       {transitions(
         (animatedStyle, alert) =>
           alert && (
-            <AnimatedAlert
-              buttons={alertButtons}
-              closeAlert={onCloseAlert}
-              message={alert.message}
+            <Alert
               style={animatedStyle}
-              title={alert.title}
-              type={alert.type}
+              alert={alert}
+              onCloseAlert={onCloseAlert}
             />
           ),
       )}

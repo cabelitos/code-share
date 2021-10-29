@@ -11,6 +11,10 @@ const interview = {
   sendLoginLink: 'Send email with link access to the interviewee',
   sendLoginLinkSuccessTitle: 'Success',
   bbsendLoginLinkSuccessMessage: 'The email was succesfully sent',
+  cancel: 'Cancel',
+  endInterviewTitle: 'Are you use you want to end the interview?',
+  endInterviewMessage:
+    'By ending the interview every participant will be expelled. This operation can not be undone!',
 };
 
 export default interview;
