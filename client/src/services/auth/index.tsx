@@ -8,7 +8,7 @@ import {
 import { useTranslation } from 'react-i18next';
 import { useHistory } from 'react-router-dom';
 
-import { useAlert, AlertType } from '../alert';
+import { useAlert, AlertType, ButtonData } from '../alert';
 import routeNames from '../../routes/routeNames';
 import usePrevious from '../../hooks/usePrevious';
 import useUpdatedRef from '../../hooks/useUpdatedRef';
@@ -22,13 +22,16 @@ import getPermissions, { Permissions } from './permissions';
 
 type TokensDataWithPermissions = TokensData & { permissions: Set<string> };
 
+interface SendLoginEmailArgs {
+  email: string;
+  successTitle: string;
+  successMessage: string;
+  shouldTriggerLoading?: boolean;
+  successModalButtons?: ButtonData[];
+}
+
 interface AuthContextData {
-  sendLoginEmail: (
-    email: string,
-    successTitle: string,
-    successMessage: string,
-    shouldTriggerLoading?: boolean,
-  ) => Promise<void>;
+  sendLoginEmail: (args: SendLoginEmailArgs) => Promise<void>;
   logout: () => void;
   hasPermission: (permission: Permissions) => boolean;
   isLoading: boolean;
@@ -43,7 +46,7 @@ interface AuthRefContext {
 }
 
 const AuthContext = React.createContext<AuthContextData>({
-  sendLoginEmail: (_: string) => Promise.reject(new Error('Missing context')),
+  sendLoginEmail: () => Promise.reject(new Error('Missing context')),
   logout: () => {
     throw new Error('Missing context');
   },
@@ -131,12 +134,13 @@ const AuthProvider: React.FC<{}> = ({ children }) => {
   const previousAuthData = usePrevious(authData);
   const [isLoadingToken, setIsLoadingToken] = React.useState(false);
   const sendLoginEmail = React.useCallback(
-    (
-      email: string,
-      successTitle: string,
-      successMessage: string,
+    ({
+      email,
+      successTitle,
+      successMessage,
       shouldTriggerLoading = true,
-    ) =>
+      successModalButtons,
+    }: SendLoginEmailArgs) =>
       wrapAuth0Promise(
         new Promise<void>((resolve, reject) => {
           try {
@@ -159,6 +163,7 @@ const AuthProvider: React.FC<{}> = ({ children }) => {
               message: successMessage,
               title: successTitle,
               type: AlertType.INFO,
+              buttons: successModalButtons,
             });
           } catch (err) {
             reject(err);

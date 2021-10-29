@@ -107,6 +107,7 @@ const Home: React.FC<{}> = () => {
         isVisible={isInterviewOpen}
       >
         <Interview
+          onOpenNotepad={onReallyOpenNotepad}
           interviewId={interviewId}
           onClose={onCloseInterview}
           title={interviewTxt}

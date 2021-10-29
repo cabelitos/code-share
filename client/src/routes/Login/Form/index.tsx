@@ -41,11 +41,11 @@ const Form: React.FC<{}> = () => {
       e.preventDefault();
       const trimmedEmail = email.trim();
       if (trimmedEmail !== '') {
-        sendLoginEmail(
-          trimmedEmail,
-          t('emailSentTitle'),
-          t('emailSentMessage'),
-        );
+        sendLoginEmail({
+          email: trimmedEmail,
+          successTitle: t('emailSentTitle'),
+          successMessage: t('emailSentMessage'),
+        });
       }
     },
     [sendLoginEmail, email, t],

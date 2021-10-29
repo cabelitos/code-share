@@ -10,8 +10,9 @@ const interview = {
   createOrJoinInterview: 'Crie ou entre em uma entrevista para ver o código',
   sendLoginLink: 'Enviar email com link de acesso ao candidato',
   sendLoginLinkSuccessTitle: 'Sucesso',
-  bbsendLoginLinkSuccessMessage: 'Email enviado com sucesso',
+  sendLoginLinkSuccessMessage: 'Email enviado com sucesso',
   cancel: 'Cancelar',
+  ok: 'Ok',
   endInterviewTitle: 'Você tem certeza que deseja terminar a entrevista?',
   endInterviewMessage:
     'Ao terminar uma entrevista todos os participants serão expulsos. Essa operação não poderá ser desfeita!',

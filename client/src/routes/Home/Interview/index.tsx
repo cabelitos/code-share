@@ -27,6 +27,7 @@ const StyledFieldset = styled(Fieldset)`
 interface InterviewProps {
   onClose: () => void;
   title: string;
+  onOpenNotepad: () => void;
   interviewId: string | null;
   style?: {
     opacity: SpringValue<number>;
@@ -38,6 +39,7 @@ const Interview: React.FC<InterviewProps> = ({
   interviewId,
   onClose,
   style,
+  onOpenNotepad,
   title,
 }) => {
   const { t } = useTranslation('interview');
@@ -54,11 +56,17 @@ const Interview: React.FC<InterviewProps> = ({
         <CurrentInterview interviewCode={interviewId} />
       </StyledFieldset>
       <Fieldset legend={t('joinInterview')}>
-        <JoinInterview isOnInterview={isOnInterview} />
+        <JoinInterview
+          onOpenNotepad={onOpenNotepad}
+          isOnInterview={isOnInterview}
+        />
       </Fieldset>
       {hasPermission(Permissions.CREATE_INTERVIEW) && (
         <Fieldset legend={t('createInterview')}>
-          <CreateInterview isOnInterview={isOnInterview} />
+          <CreateInterview
+            onOpenNotepad={onOpenNotepad}
+            isOnInterview={isOnInterview}
+          />
         </Fieldset>
       )}
       {hasPermission(Permissions.END_INTERVIEW) && (

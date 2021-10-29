@@ -8,26 +8,38 @@ import { useCreateInterviewMutation } from '../../../../state/__generated__';
 
 interface CreateInterviewProps {
   isOnInterview: boolean;
+  onOpenNotepad: () => void;
 }
 
-const CreateInterview: React.FC<CreateInterviewProps> = ({ isOnInterview }) => {
+const CreateInterview: React.FC<CreateInterviewProps> = ({
+  isOnInterview,
+  onOpenNotepad,
+}) => {
   const { t } = useTranslation('interview');
   const [shouldSendEmailLink, setShouldSendEmailLink] = React.useState(true);
   const [createInterview] = useCreateInterviewMutation();
   const { sendLoginEmail } = useAuth();
   const onSubmit = React.useCallback(
-    (interviewee: string) =>
-      createInterview({
+    async (interviewee: string) => {
+      const { data } = await createInterview({
         variables: { input: { interviewee } },
-      }).then(() =>
-        sendLoginEmail(
-          interviewee,
-          t('sendLoginLinkSuccessTitle'),
-          t('bbsendLoginLinkSuccessMessage'),
-          false,
-        ),
-      ),
-    [createInterview, sendLoginEmail, t],
+      });
+      const interviewId = data?.createInterview.id;
+      if (!interviewId) return;
+      sendLoginEmail({
+        email: interviewee,
+        successTitle: t('sendLoginLinkSuccessTitle'),
+        successMessage: t('sendLoginLinkSuccessMessage'),
+        shouldTriggerLoading: false,
+        successModalButtons: [
+          {
+            value: t('ok'),
+            onClick: onOpenNotepad,
+          },
+        ],
+      });
+    },
+    [createInterview, sendLoginEmail, t, onOpenNotepad],
   );
   const onCheckBoxChanged = React.useCallback(
     () => setShouldSendEmailLink(prev => !prev),

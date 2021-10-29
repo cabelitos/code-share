@@ -6,15 +6,25 @@ import { useJoinInterviewMutation } from '../../../../state/__generated__';
 
 interface JoinInterviewProps {
   isOnInterview: boolean;
+  onOpenNotepad: () => void;
 }
 
-const JoinInterview: React.FC<JoinInterviewProps> = ({ isOnInterview }) => {
+const JoinInterview: React.FC<JoinInterviewProps> = ({
+  isOnInterview,
+  onOpenNotepad,
+}) => {
   const { t } = useTranslation('interview');
   const [joinInterview] = useJoinInterviewMutation();
   const onSubmit = React.useCallback(
-    (interviewId: string) =>
-      joinInterview({ variables: { input: { interviewId } } }),
-    [joinInterview],
+    async (interviewId: string) => {
+      const { data } = await joinInterview({
+        variables: { input: { interviewId } },
+      });
+      const joinedInterviewId = data?.joinInterview.id;
+      if (!joinedInterviewId) return;
+      onOpenNotepad();
+    },
+    [joinInterview, onOpenNotepad],
   );
   return (
     <InterviewForm
