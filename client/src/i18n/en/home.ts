@@ -7,6 +7,7 @@ const home = {
   no: 'No',
   interview: 'Interview',
   noInterviewTitle: 'Error',
+  noActiveInterview: 'No active interview',
   noInterviewMessage: 'Please, join an interview to open the notepad',
 };
 

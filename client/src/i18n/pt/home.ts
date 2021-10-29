@@ -7,6 +7,7 @@ const home = {
   no: 'Não',
   interview: 'Entrevista',
   noInterviewTitle: 'Erro',
+  noActiveInterview: 'Não existe uma entrevista ativa',
   noInterviewMessage:
     'Por favor, entre numa entrevista para iniciar o bloco de notas',
 };
