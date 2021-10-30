@@ -3,6 +3,7 @@ import { ApolloServer } from 'apollo-server-fastify';
 import {
   ApolloServerPluginInlineTraceDisabled,
   ApolloServerPluginDrainHttpServer,
+  ApolloServerPluginLandingPageDisabled,
 } from 'apollo-server-core';
 import { buildSchema } from 'type-graphql';
 import type { ApolloServerPlugin } from 'apollo-server-plugin-base';
@@ -32,14 +33,18 @@ const start = async (): Promise<void> => {
     resolvers,
     container: Container,
   });
+  const plugins = [
+    ApolloServerPluginInlineTraceDisabled(),
+    fastifyAppClosePlugin(app),
+    ApolloServerPluginDrainHttpServer({ httpServer: app.server }),
+  ];
+  if (process.env.NODE_ENV === 'production') {
+    plugins.push(ApolloServerPluginLandingPageDisabled());
+  }
   const server = new ApolloServer({
     schema,
     context: createContext,
-    plugins: [
-      ApolloServerPluginInlineTraceDisabled(),
-      fastifyAppClosePlugin(app),
-      ApolloServerPluginDrainHttpServer({ httpServer: app.server }),
-    ],
+    plugins,
   });
   const ops = await getConnectionOptions();
   await createConnection({
