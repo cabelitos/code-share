@@ -15,6 +15,7 @@ import InterviewParticipant from '../types/interviewParticipant';
 import InterviewDiff from '../types/interviewDiff';
 import type { AuthContext } from '../auth/types';
 import { Permissions } from '../auth/types';
+import UniqueConstraintViolated from '../errors/UniqueConstraintViolated';
 
 const wrapInTransaction =
   <TResult, TArgs extends Array<unknown> = unknown[]>(
@@ -119,18 +120,27 @@ export default class InterviewService {
       .then(interview => interview ?? null);
   }
 
-  createInterviewDiff(
+  async createInterviewDiff(
     data: Pick<InterviewDiff, 'event' | 'value'>,
     createdBy: string,
     interviewId: string,
-  ): Promise<unknown> {
-    return getManager()
-      .createQueryBuilder()
-      .insert()
-      .into(InterviewDiff)
-      .values({ ...data, createdBy, interviewId })
-      .updateEntity(false)
-      .execute();
+  ): Promise<InsertResult> {
+    try {
+      return await getManager()
+        .createQueryBuilder()
+        .insert()
+        .into(InterviewDiff)
+        .values({ ...data, createdBy, interviewId })
+        .updateEntity(false)
+        .execute();
+    } catch (err) {
+      if (err.driverError?.code === 'SQLITE_CONSTRAINT_UNIQUE') {
+        throw new UniqueConstraintViolated(
+          err.driverError?.message ?? 'Unknown',
+        );
+      }
+      throw err;
+    }
   }
 
   getInterviewDiff(interviewId: string): Promise<InterviewDiff[]> {

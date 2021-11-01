@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   Column,
   PrimaryGeneratedColumn,
+  Index,
 } from 'typeorm';
 import Interview from '../interview';
 
@@ -34,4 +35,8 @@ export default class InterviewDiff {
 
   @Column('int')
   versionId: number;
+
+  @Column()
+  @Index({ unique: true })
+  etag: string;
 }

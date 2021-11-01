@@ -28,6 +28,7 @@ services:
       - TYPEORM_SYNCHRONIZE=1
       - TYPEORM_DATABASE=/app/db/code-share.sqlite
       - SOCKET_PATH=/editor
+      - SOCKET_TIMEOUT_IN_MS=3000
     build:
         context: ./
         target: server

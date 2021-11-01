@@ -3,6 +3,8 @@ import io, { Socket } from 'socket.io-client';
 import type { OnChange, OnMount } from '@monaco-editor/react';
 import { useTranslation } from 'react-i18next';
 import type { editor } from 'monaco-editor';
+import promiseRetry from 'promise-retry';
+import { v4 as uuidV4 } from 'uuid';
 
 import { useAuth } from '../auth';
 import { useClearCurrentInterview } from '../../state/interview/currentInterview';
@@ -36,6 +38,39 @@ const SocketCtx = React.createContext<SocketCtxData>({
 });
 
 export const useSocket = (): SocketCtxData => React.useContext(SocketCtx);
+
+const timeoutInMs = parseInt(
+  process.env.REACT_APP_SOCKET_TIMEOUT_IN_MS ?? '3000',
+  10,
+);
+
+const emitEvent = (
+  socket: Socket | null,
+  event: string,
+  data: Record<string, unknown>,
+) => {
+  const dataToSend = { ...data, etag: uuidV4() };
+  return promiseRetry(
+    retry =>
+      Promise.race([
+        new Promise<void>((resolve, reject) => {
+          try {
+            if (!socket || socket.disconnected) {
+              resolve();
+              return;
+            }
+            socket.emit(event, dataToSend, resolve);
+          } catch (err) {
+            reject(err);
+          }
+        }),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error('Timeout')), timeoutInMs),
+        ),
+      ]).catch(retry),
+    // eslint-disable-next-line no-console
+  ).catch(console.error);
+};
 
 const SocketProvider: React.FC<{}> = ({ children }) => {
   const socketRef = React.useRef<Socket | null>(null);
@@ -91,7 +126,7 @@ const SocketProvider: React.FC<{}> = ({ children }) => {
         setConnectionState(ConnectionState.CONNECTED);
         editor.updateOptions({ readOnly: false });
       });
-      socket.on('editorChanged', ({ value, event }) => {
+      socket.on('editorChanged', ({ value, event }, ack) => {
         suppress.current = true;
         editor.executeEdits(
           value,
@@ -101,19 +136,22 @@ const SocketProvider: React.FC<{}> = ({ children }) => {
           })),
         );
         suppress.current = false;
+        ack();
       });
-      socket.on('participantJoined', email => {
+      socket.on('participantJoined', (email, ack) => {
         setParticipants(prev => {
           if (prev.indexOf(email) === -1) return [...prev, email];
           return prev;
         });
+        ack();
       });
       socket.on('interviewEnded', () => {
         ended = true;
         clearCurrentInterview(interviewId);
       });
-      socket.on('participantLeft', email => {
+      socket.on('participantLeft', (email, ack) => {
         setParticipants(prev => prev.filter(e => e !== email));
+        ack();
       });
       socket.on('disconnect', reason => {
         if (reason === 'io server disconnect' && !ended) {
@@ -123,8 +161,9 @@ const SocketProvider: React.FC<{}> = ({ children }) => {
         setConnectionState(ConnectionState.DISCONNECTED);
         editor.updateOptions({ readOnly: true });
       });
-      socket.on('onLanguageChanged', ({ language }) => {
+      socket.on('onLanguageChanged', ({ language }, ack) => {
         setLanguage(language);
+        ack();
       });
       socketRef.current = socket;
     }
@@ -144,7 +183,7 @@ const SocketProvider: React.FC<{}> = ({ children }) => {
         if (suppress.current) {
           return;
         }
-        socketRef.current?.emit('editorChanged', {
+        emitEvent(socketRef.current, 'editorChanged', {
           value,
           event: changes,
           versionId,
@@ -156,7 +195,7 @@ const SocketProvider: React.FC<{}> = ({ children }) => {
       onSetEditor,
       onLanguageChanged: (language: string) => {
         setLanguage(language);
-        socketRef.current?.emit('onLanguageChanged', { language });
+        emitEvent(socketRef.current, 'onLanguageChanged', { language });
       },
     }),
     [connectionState, participants, language],
