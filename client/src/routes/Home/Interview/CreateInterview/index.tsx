@@ -26,6 +26,10 @@ const CreateInterview: React.FC<CreateInterviewProps> = ({
       });
       const interviewId = data?.createInterview.id;
       if (!interviewId) return;
+      if (!shouldSendEmailLink) {
+        onOpenNotepad();
+        return;
+      }
       sendLoginEmail({
         email: interviewee,
         successTitle: t('sendLoginLinkSuccessTitle'),
@@ -39,7 +43,7 @@ const CreateInterview: React.FC<CreateInterviewProps> = ({
         ],
       });
     },
-    [createInterview, sendLoginEmail, t, onOpenNotepad],
+    [createInterview, sendLoginEmail, t, onOpenNotepad, shouldSendEmailLink],
   );
   const onCheckBoxChanged = React.useCallback(
     () => setShouldSendEmailLink(prev => !prev),
